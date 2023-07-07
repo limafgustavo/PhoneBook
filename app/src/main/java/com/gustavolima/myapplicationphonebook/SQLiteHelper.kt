@@ -2,8 +2,10 @@ package com.gustavolima.myapplicationphonebook
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import java.lang.Exception
 
 class SQLiteHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -29,6 +31,7 @@ class SQLiteHelper(context: Context) :
         db!!.execSQL("DROP TABLE IF EXISTS $TBL_CONTACT")
         onCreate(db)
     }
+
     fun insertPhone(phone: PhoneBookModel): Long {
         val db = this.writableDatabase
         val contentValues = ContentValues()
@@ -39,6 +42,35 @@ class SQLiteHelper(context: Context) :
         val success = db.insert(TBL_CONTACT, null, contentValues)
         db.close()
         return success
+    }
+
+    fun getAllNumbers(): ArrayList<PhoneBookModel> {
+        val phoneList: ArrayList<PhoneBookModel> = ArrayList()
+        val selectQuery = "SELEC * FROM $TBL_CONTACT"
+        val db = this.readableDatabase
+
+        val cursor: Cursor?
+
+        try {
+            cursor = db.rawQuery(selectQuery, null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            db.execSQL(selectQuery)
+            return ArrayList()
+        }
+        var id: Int
+        var name: String
+        var number: String
+
+        if (cursor.moveToFirst())
+            do {
+                id = cursor.getInt(cursor.getColumnIndex("id"))
+                name = cursor.getString(cursor.getColumnIndex("name"))
+                number = cursor.getString(cursor.getColumnIndex("number"))
+                val phone = PhoneBookModel(id = id, name = name, number = number)
+                phoneList.add(phone)
+            } while (cursor.moveToNext())
+        return phoneList
     }
 
 }
