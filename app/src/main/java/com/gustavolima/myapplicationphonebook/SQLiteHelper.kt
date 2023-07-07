@@ -29,6 +29,16 @@ class SQLiteHelper(context: Context) :
         db!!.execSQL("DROP TABLE IF EXISTS $TBL_CONTACT")
         onCreate(db)
     }
+    fun insertPhone(phone: PhoneBookModel): Long {
+        val db = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(ID, phone.id)
+        contentValues.put(NAME, phone.name)
+        contentValues.put(NUMBER, phone.number)
 
+        val success = db.insert(TBL_CONTACT, null, contentValues)
+        db.close()
+        return success
+    }
 
 }
